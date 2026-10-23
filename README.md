@@ -54,6 +54,10 @@ MiniLedger/
         └── screens/             Login, Home, AddEntry
 ```
 
+## Quick start (Windows)
+
+After the one-time setup below, run `.\start.bat` in the `MiniLedger` folder. It opens two windows: the backend, and the Expo app with its QR code.
+
 ## Run the backend
 
 You need **Node.js 20+** and **PostgreSQL** installed.
