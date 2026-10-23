@@ -1,7 +1,7 @@
 // Your laptop's Wi-Fi IP address. The phone can't use "localhost" (that would mean the phone itself).
 // To find it on Windows: run `ipconfig` and copy the "IPv4 Address" under your Wi-Fi adapter.
 // The phone and laptop must be on the same Wi-Fi network.
-export const API_URL = 'http://10.20.17.14:4000';
+export const API_URL = 'http://10.110.156.133:4000';
 
 // A loan as returned by the backend.
 export type Loan = {

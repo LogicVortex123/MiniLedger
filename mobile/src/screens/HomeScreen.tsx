@@ -10,7 +10,7 @@ import {
   View,
 } from 'react-native';
 import { API_URL, Loan, Summary, request } from '../api';
-import { colors, styles } from '../styles';
+import { avatarColors, colors, styles } from '../styles';
 
 type Props = {
   onAddPress: () => void;
@@ -41,13 +41,18 @@ function daysUntil(date: string) {
 
 // Friendly text under the friend's name, e.g. "Due in 5 days".
 function dueText(loan: Loan) {
-  if (loan.isRepaid) return `Was due ${formatDate(loan.dueDate)}`;
+  if (loan.isRepaid) return `Settled · was due ${formatDate(loan.dueDate)}`;
 
   const days = daysUntil(loan.dueDate);
   if (loan.isOverdue) return `Overdue by ${-days} day${days === -1 ? '' : 's'}`;
   if (days <= 0) return 'Due today';
   if (days === 1) return 'Due tomorrow';
-  return `Due in ${days} days · ${formatDate(loan.dueDate)}`;
+  return `Due in ${days} days`;
+}
+
+// The same friend always gets the same avatar colour.
+function avatarColor(name: string) {
+  return avatarColors[name.charCodeAt(0) % avatarColors.length];
 }
 
 export default function HomeScreen({ onAddPress, onLogout }: Props) {
@@ -103,6 +108,8 @@ export default function HomeScreen({ onAddPress, onLogout }: Props) {
   }
 
   function renderLoan({ item }: { item: Loan }) {
+    const avatar = avatarColor(item.friendName);
+
     return (
       <View
         style={[
@@ -111,70 +118,108 @@ export default function HomeScreen({ onAddPress, onLogout }: Props) {
           item.isRepaid && styles.loanCardRepaid,
         ]}
       >
-        {/* Receipt photo if there is one, otherwise the friend's first letter */}
-        {item.receiptUrl ? (
-          <Image source={{ uri: API_URL + item.receiptUrl }} style={styles.thumbnail} />
-        ) : (
-          <View style={styles.avatar}>
-            <Text style={styles.avatarText}>{item.friendName.charAt(0).toUpperCase()}</Text>
+        <View style={styles.row}>
+          {/* Receipt photo if there is one, otherwise the friend's first letter */}
+          {item.receiptUrl ? (
+            <Image source={{ uri: API_URL + item.receiptUrl }} style={styles.thumbnail} />
+          ) : (
+            <View style={[styles.avatar, { backgroundColor: avatar.bg }]}>
+              <Text style={[styles.avatarText, { color: avatar.fg }]}>
+                {item.friendName.charAt(0).toUpperCase()}
+              </Text>
+            </View>
+          )}
+
+          <View style={styles.loanInfo}>
+            <Text style={styles.loanName} numberOfLines={1}>
+              {item.friendName}
+            </Text>
+            <Text style={[styles.loanDue, item.isOverdue && styles.loanDueOverdue]}>{dueText(item)}</Text>
           </View>
-        )}
 
-        <View style={styles.loanInfo}>
-          <Text style={styles.loanName} numberOfLines={1}>
-            {item.friendName}
-          </Text>
-          <Text style={[styles.loanDue, item.isOverdue && styles.loanDueOverdue]}>{dueText(item)}</Text>
+          <View style={styles.loanRight}>
+            <Text style={[styles.loanAmount, item.isRepaid && styles.loanAmountRepaid]}>
+              {formatMoney(item.amount)}
+            </Text>
+            {item.isRepaid ? (
+              <Text style={[styles.badge, styles.badgeRepaid]}>REPAID</Text>
+            ) : item.isOverdue ? (
+              <Text style={[styles.badge, styles.badgeOverdue]}>OVERDUE</Text>
+            ) : (
+              <Text style={[styles.badge, styles.badgePending]}>PENDING</Text>
+            )}
+          </View>
         </View>
 
-        <View style={styles.loanRight}>
-          <Text style={[styles.loanAmount, item.isRepaid && styles.loanAmountRepaid]}>
-            {formatMoney(item.amount)}
-          </Text>
-          {item.isOverdue ? <Text style={[styles.badge, styles.badgeOverdue]}>OVERDUE</Text> : null}
-          {item.isRepaid ? <Text style={[styles.badge, styles.badgeRepaid]}>REPAID</Text> : null}
-          {!item.isRepaid ? (
+        {/* Unpaid entries get the due date and a "Repaid" button */}
+        {!item.isRepaid ? (
+          <View style={styles.loanFooter}>
+            <Text style={styles.loanFooterText}>Due {formatDate(item.dueDate)}</Text>
             <TouchableOpacity style={styles.repayButton} onPress={() => handleRepay(item)}>
-              <Text style={styles.repayButtonText}>Repaid</Text>
+              <Text style={styles.repayButtonText}>✓ Repaid</Text>
             </TouchableOpacity>
-          ) : null}
-        </View>
+          </View>
+        ) : null}
       </View>
     );
   }
 
-  // Shown above the list: any error, the summary card, then the "Entries" heading.
+  // How much of the lent money has come back, as a whole percentage (0-100).
+  const repaidPercent =
+    summary && summary.totalLent > 0 ? Math.round((summary.totalRepaid / summary.totalLent) * 100) : 0;
+
+  // Shown above the list: the dark header with the summary, any error, then the "Entries" heading.
   const listHeader = (
     <View>
-      {error ? <Text style={[styles.error, { marginTop: 0, marginBottom: 16 }]}>{error}</Text> : null}
+      <View style={styles.hero}>
+        <View style={[styles.circle, styles.circleLarge]} />
+        <View style={[styles.circle, styles.circleSmall]} />
 
-      {summary ? (
-        <View style={styles.summaryCard}>
-          <Text style={styles.summaryLabel}>Outstanding</Text>
-          <Text style={styles.summaryBig}>{formatMoney(summary.outstanding)}</Text>
-
-          <View style={styles.summaryRow}>
-            <View style={styles.statBox}>
-              <Text style={styles.statLabel}>Total lent</Text>
-              <Text style={styles.statValue}>{formatMoney(summary.totalLent)}</Text>
-            </View>
-            <View style={styles.statBox}>
-              <Text style={styles.statLabel}>Repaid</Text>
-              <Text style={styles.statValue}>{formatMoney(summary.totalRepaid)}</Text>
-            </View>
-            <View style={styles.statBox}>
-              <Text style={styles.statLabel}>Overdue</Text>
-              <Text style={[styles.statValue, summary.overdueAmount > 0 && styles.statValueOverdue]}>
-                {formatMoney(summary.overdueAmount)}
-              </Text>
-            </View>
+        <View style={styles.heroTop}>
+          <View>
+            <Text style={styles.heroGreeting}>Welcome back</Text>
+            <Text style={styles.heroTitle}>MiniLedger</Text>
           </View>
+          <TouchableOpacity style={styles.ghostButton} onPress={onLogout}>
+            <Text style={styles.ghostButtonText}>Logout</Text>
+          </TouchableOpacity>
         </View>
-      ) : null}
+
+        {summary ? (
+          <>
+            <Text style={styles.summaryLabel}>Outstanding</Text>
+            <Text style={styles.summaryBig}>{formatMoney(summary.outstanding)}</Text>
+
+            <View style={styles.progressTrack}>
+              <View style={[styles.progressFill, { width: `${repaidPercent}%` }]} />
+            </View>
+            <Text style={styles.progressText}>{repaidPercent}% of the money you lent has been repaid</Text>
+
+            <View style={styles.statRow}>
+              <View style={styles.statBox}>
+                <Text style={styles.statLabel}>Total lent</Text>
+                <Text style={styles.statValue}>{formatMoney(summary.totalLent)}</Text>
+              </View>
+              <View style={styles.statBox}>
+                <Text style={styles.statLabel}>Repaid</Text>
+                <Text style={styles.statValue}>{formatMoney(summary.totalRepaid)}</Text>
+              </View>
+              <View style={styles.statBox}>
+                <Text style={styles.statLabel}>Overdue</Text>
+                <Text style={[styles.statValue, summary.overdueAmount > 0 && styles.statValueOverdue]}>
+                  {formatMoney(summary.overdueAmount)}
+                </Text>
+              </View>
+            </View>
+          </>
+        ) : null}
+      </View>
+
+      {error ? <Text style={[styles.error, { marginHorizontal: 16 }]}>{error}</Text> : null}
 
       {loans.length > 0 ? (
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Entries</Text>
+          <Text style={styles.sectionTitle}>Your entries</Text>
           <Text style={styles.sectionCount}>
             {loans.length} {loans.length === 1 ? 'entry' : 'entries'}
           </Text>
@@ -183,46 +228,36 @@ export default function HomeScreen({ onAddPress, onLogout }: Props) {
     </View>
   );
 
-  const emptyState = (
+  // Shown when the list has no rows: a spinner while loading, otherwise a friendly message.
+  const emptyState = loading ? (
+    <ActivityIndicator size="large" color={colors.primary} style={{ marginTop: 60 }} />
+  ) : (
     <View style={styles.emptyBox}>
       <View style={styles.emptyIcon}>
         <Text style={styles.emptyIconText}>₹</Text>
       </View>
       <Text style={styles.emptyTitle}>No entries yet</Text>
-      <Text style={styles.emptyText}>Tap the + button to record money you lent to a friend.</Text>
+      <Text style={styles.emptyText}>Tap "Add entry" to record money you lent to a friend.</Text>
     </View>
   );
 
   return (
     <View style={styles.screen}>
-      <View style={styles.header}>
-        <View>
-          <Text style={styles.greeting}>Welcome back</Text>
-          <Text style={styles.title}>MiniLedger</Text>
-        </View>
-        <TouchableOpacity style={styles.pillButton} onPress={onLogout}>
-          <Text style={styles.pillButtonText}>Logout</Text>
-        </TouchableOpacity>
-      </View>
-
-      {loading ? (
-        <ActivityIndicator size="large" color={colors.primary} style={{ marginTop: 60 }} />
-      ) : (
-        <FlatList
-          data={loans}
-          keyExtractor={(loan) => String(loan.id)}
-          renderItem={renderLoan}
-          ListHeaderComponent={listHeader}
-          ListEmptyComponent={emptyState}
-          contentContainerStyle={styles.list}
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} colors={[colors.primary]} />
-          }
-        />
-      )}
+      <FlatList
+        data={loans}
+        keyExtractor={(loan) => String(loan.id)}
+        renderItem={renderLoan}
+        ListHeaderComponent={listHeader}
+        ListEmptyComponent={emptyState}
+        contentContainerStyle={styles.list}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} colors={[colors.primary]} />
+        }
+      />
 
       <TouchableOpacity style={styles.fab} onPress={onAddPress}>
-        <Text style={styles.fabText}>+</Text>
+        <Text style={styles.fabIcon}>+</Text>
+        <Text style={styles.fabText}>Add entry</Text>
       </TouchableOpacity>
     </View>
   );

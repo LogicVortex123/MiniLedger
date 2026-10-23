@@ -76,9 +76,13 @@ export default function LoginScreen({ onLogin }: Props) {
 
   return (
     <KeyboardAvoidingView
-      style={styles.screen}
+      style={styles.darkScreen}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
+      {/* Decorative background circles */}
+      <View style={[styles.circle, styles.circleLarge]} />
+      <View style={[styles.circle, styles.circleSmall, { bottom: 80 }]} />
+
       <ScrollView contentContainerStyle={styles.loginContent} keyboardShouldPersistTaps="handled">
         {/* App logo and name */}
         <View style={styles.logo}>
@@ -86,6 +90,14 @@ export default function LoginScreen({ onLogin }: Props) {
         </View>
         <Text style={styles.appName}>MiniLedger</Text>
         <Text style={styles.tagline}>Never forget who owes you money</Text>
+
+        <View style={styles.featureRow}>
+          {['Track loans', 'Spot overdue', 'Mark repaid'].map((feature) => (
+            <View key={feature} style={styles.featureChip}>
+              <Text style={styles.featureChipText}>{feature}</Text>
+            </View>
+          ))}
+        </View>
 
         <View style={styles.card}>
           {step === 'phone' ? (
@@ -105,7 +117,6 @@ export default function LoginScreen({ onLogin }: Props) {
                   placeholderTextColor={colors.placeholder}
                   keyboardType="number-pad"
                   maxLength={10}
-                  autoFocus
                 />
               </View>
             </>
@@ -124,19 +135,20 @@ export default function LoginScreen({ onLogin }: Props) {
                 placeholderTextColor={colors.placeholder}
                 keyboardType="number-pad"
                 maxLength={6}
-                autoFocus
               />
 
-              <View style={styles.infoBox}>
-                {demoOtp ? (
-                  <>
-                    <Text style={styles.infoText}>Demo mode (no real SMS is sent). Your OTP is:</Text>
-                    <Text style={styles.demoOtp}>{demoOtp}</Text>
-                  </>
-                ) : (
-                  <Text style={styles.infoText}>Demo mode: the OTP is printed in the backend terminal.</Text>
-                )}
-              </View>
+              {/* Demo mode: no real SMS is sent, so show the OTP here. Tapping it fills the box. */}
+              {demoOtp ? (
+                <TouchableOpacity style={styles.demoBox} onPress={() => setOtp(demoOtp)}>
+                  <Text style={styles.demoLabel}>DEMO OTP</Text>
+                  <Text style={styles.demoOtp}>{demoOtp}</Text>
+                  <Text style={styles.demoHint}>No real SMS is sent. Tap to fill it in.</Text>
+                </TouchableOpacity>
+              ) : (
+                <View style={styles.demoBox}>
+                  <Text style={styles.demoHint}>Demo mode: the OTP is printed in the backend terminal.</Text>
+                </View>
+              )}
             </>
           )}
 
@@ -155,7 +167,7 @@ export default function LoginScreen({ onLogin }: Props) {
           </TouchableOpacity>
 
           {step === 'otp' ? (
-            <View style={[styles.row, { justifyContent: 'space-between', marginTop: 18 }]}>
+            <View style={styles.linkRow}>
               <TouchableOpacity onPress={handleChangeNumber}>
                 <Text style={styles.linkText}>Change number</Text>
               </TouchableOpacity>

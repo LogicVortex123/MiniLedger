@@ -39,7 +39,8 @@ export default function App() {
 
   return (
     <>
-      <StatusBar style="dark" />
+      {/* Light icons, because every screen has a dark header */}
+      <StatusBar style="light" />
       {content}
     </>
   );

@@ -102,19 +102,21 @@ export default function AddEntryScreen({ onSaved, onCancel }: Props) {
       style={styles.screen}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={onCancel}>
-          <Text style={styles.backArrow}>‹</Text>
-          <Text style={styles.linkText}>Back</Text>
-        </TouchableOpacity>
-      </View>
-
       <ScrollView contentContainerStyle={styles.form} keyboardShouldPersistTaps="handled">
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>New entry</Text>
-          <Text style={styles.cardSubtitle}>Record money you lent to a friend.</Text>
+        {/* Dark header; the form card below overlaps its bottom edge */}
+        <View style={[styles.hero, styles.formHero]}>
+          <View style={[styles.circle, styles.circleLarge]} />
+          <View style={[styles.circle, styles.circleSmall]} />
 
-          <Text style={styles.label}>Friend's name</Text>
+          <TouchableOpacity style={styles.backCircle} onPress={onCancel}>
+            <Text style={styles.backArrow}>‹</Text>
+          </TouchableOpacity>
+          <Text style={styles.heroTitle}>New entry</Text>
+          <Text style={styles.heroSubtitle}>Record money you lent to a friend.</Text>
+        </View>
+
+        <View style={[styles.card, styles.formCard]}>
+          <Text style={[styles.label, { marginTop: 0 }]}>Friend's name</Text>
           <TextInput
             style={styles.input}
             value={friendName}
@@ -166,6 +168,7 @@ export default function AddEntryScreen({ onSaved, onCancel }: Props) {
             <TouchableOpacity style={styles.receiptBox} onPress={pickPhoto}>
               <Text style={styles.receiptBoxIcon}>+</Text>
               <Text style={styles.receiptBoxText}>Add receipt photo</Text>
+              <Text style={styles.receiptBoxHint}>JPG or PNG, up to 5 MB</Text>
             </TouchableOpacity>
           )}
 
