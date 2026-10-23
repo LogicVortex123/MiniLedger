@@ -12,6 +12,11 @@ app.use(cors()); // allow requests from the mobile app
 app.use(express.json()); // read JSON request bodies into req.body
 app.use('/uploads', express.static('uploads')); // serve receipt images
 
+// Opening http://localhost:4000 in a browser shows that the API is up.
+app.get('/', (_req, res) => {
+  res.json({ message: 'MiniLedger API is running', health: '/health', api: '/api' });
+});
+
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok' });
 });
