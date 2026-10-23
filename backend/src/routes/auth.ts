@@ -35,7 +35,11 @@ router.post('/request-otp', (req, res) => {
   // Mock SMS: the OTP is printed in the server terminal instead of being texted.
   console.log(`[MOCK OTP] ${phone} -> ${otp}`);
 
-  res.json({ message: 'OTP sent' });
+  // Demo only: also send the OTP back so the app can display it, since no real SMS is sent.
+  // It is left out in production (NODE_ENV=production), where a real SMS service would be used.
+  const devOtp = process.env.NODE_ENV === 'production' ? undefined : otp;
+
+  res.json({ message: 'OTP sent', devOtp });
 });
 
 // POST /api/auth/verify-otp  { phone, otp }  ->  { token }

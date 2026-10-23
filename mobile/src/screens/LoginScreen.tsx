@@ -21,6 +21,7 @@ export default function LoginScreen({ onLogin }: Props) {
   const [step, setStep] = useState<'phone' | 'otp'>('phone');
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
+  const [demoOtp, setDemoOtp] = useState(''); // OTP sent back by the backend in demo mode
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -33,10 +34,11 @@ export default function LoginScreen({ onLogin }: Props) {
     setError('');
     setLoading(true);
     try {
-      await request('/api/auth/request-otp', {
+      const data = await request<{ message: string; devOtp?: string }>('/api/auth/request-otp', {
         method: 'POST',
         body: JSON.stringify({ phone }),
       });
+      setDemoOtp(data.devOtp ?? '');
       setOtp('');
       setStep('otp');
     } catch (e) {
@@ -126,9 +128,14 @@ export default function LoginScreen({ onLogin }: Props) {
               />
 
               <View style={styles.infoBox}>
-                <Text style={styles.infoText}>
-                  Demo mode: the OTP is printed in the backend terminal. Use the newest one.
-                </Text>
+                {demoOtp ? (
+                  <>
+                    <Text style={styles.infoText}>Demo mode (no real SMS is sent). Your OTP is:</Text>
+                    <Text style={styles.demoOtp}>{demoOtp}</Text>
+                  </>
+                ) : (
+                  <Text style={styles.infoText}>Demo mode: the OTP is printed in the backend terminal.</Text>
+                )}
               </View>
             </>
           )}

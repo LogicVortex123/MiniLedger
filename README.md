@@ -112,7 +112,7 @@ You need **Node.js 20+** and **PostgreSQL** installed.
    ```
 
 4. Install **Expo Go** on your phone (same Wi-Fi as the laptop) and scan the QR code.
-5. Log in with any valid Indian mobile number. **The OTP is printed in the backend terminal** as `[MOCK OTP] 98xxxxxxxx -> 123456`.
+5. Log in with any valid Indian mobile number. The OTP is printed in the backend terminal as `[MOCK OTP] 98xxxxxxxx -> 123456`, and in demo mode it is also shown on the OTP screen of the app.
 
 **If the app can't reach the server:** check that the phone and laptop are on the same Wi-Fi, that `API_URL` matches the current IP, and that Windows Firewall allows Node.js on private networks.
 
@@ -123,7 +123,7 @@ All `/api/loans` routes need the header `Authorization: Bearer <token>`.
 | Method | Path | Body | Response |
 | --- | --- | --- | --- |
 | GET | `/health` | – | `200 { status: "ok" }` |
-| POST | `/api/auth/request-otp` | `{ phone }` | `200`, OTP printed in the server log · `400` invalid phone |
+| POST | `/api/auth/request-otp` | `{ phone }` | `200 { message, devOtp }`, OTP printed in the server log (`devOtp` is left out when `NODE_ENV=production`) · `400` invalid phone |
 | POST | `/api/auth/verify-otp` | `{ phone, otp }` | `200 { token }` · `400` bad input · `401` wrong/expired OTP |
 | GET | `/api/loans` | – | `200` list of loans (each with computed `isOverdue`) |
 | GET | `/api/loans/summary` | – | `200 { totalLent, totalRepaid, outstanding, overdueAmount }` |

@@ -249,6 +249,13 @@ export const styles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 18,
   },
+  demoOtp: {
+    color: colors.primary,
+    fontSize: 24,
+    fontWeight: 'bold',
+    letterSpacing: 6,
+    marginTop: 4,
+  },
 
   // ---------- Summary card ----------
   summaryCard: {
