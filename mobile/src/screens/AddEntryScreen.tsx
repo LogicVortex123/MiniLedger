@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { Loan, request } from '../api';
-import { styles } from '../styles';
+import { colors, styles } from '../styles';
 
 type Props = {
   onSaved: () => void;
@@ -102,64 +102,87 @@ export default function AddEntryScreen({ onSaved, onCancel }: Props) {
       style={styles.screen}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <View style={styles.topBar}>
-        <Text style={styles.title}>New entry</Text>
-        <TouchableOpacity onPress={onCancel}>
-          <Text style={styles.linkText}>Cancel</Text>
+      <View style={styles.header}>
+        <TouchableOpacity style={styles.backButton} onPress={onCancel}>
+          <Text style={styles.backArrow}>‹</Text>
+          <Text style={styles.linkText}>Back</Text>
         </TouchableOpacity>
       </View>
 
       <ScrollView contentContainerStyle={styles.form} keyboardShouldPersistTaps="handled">
-        <Text style={[styles.label, { marginTop: 0 }]}>Friend's name</Text>
-        <TextInput
-          style={styles.input}
-          value={friendName}
-          onChangeText={setFriendName}
-          placeholder="e.g. Rahul"
-          maxLength={100}
-        />
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>New entry</Text>
+          <Text style={styles.cardSubtitle}>Record money you lent to a friend.</Text>
 
-        <Text style={styles.label}>Amount (₹)</Text>
-        <TextInput
-          style={styles.input}
-          value={amount}
-          onChangeText={setAmount}
-          placeholder="e.g. 1500"
-          keyboardType="decimal-pad"
-        />
+          <Text style={styles.label}>Friend's name</Text>
+          <TextInput
+            style={styles.input}
+            value={friendName}
+            onChangeText={setFriendName}
+            placeholder="e.g. Rahul Sharma"
+            placeholderTextColor={colors.placeholder}
+            maxLength={100}
+          />
 
-        <Text style={styles.label}>Due date</Text>
-        <TextInput
-          style={styles.input}
-          value={dueDate}
-          onChangeText={setDueDate}
-          placeholder="YYYY-MM-DD"
-          keyboardType="numbers-and-punctuation"
-          maxLength={10}
-        />
+          <Text style={styles.label}>Amount</Text>
+          <View style={styles.inputWithPrefix}>
+            <Text style={styles.inputPrefix}>₹</Text>
+            <TextInput
+              style={styles.inputInner}
+              value={amount}
+              onChangeText={setAmount}
+              placeholder="1500"
+              placeholderTextColor={colors.placeholder}
+              keyboardType="decimal-pad"
+            />
+          </View>
 
-        <Text style={styles.label}>Receipt photo (optional)</Text>
-        <TouchableOpacity style={styles.secondaryButton} onPress={pickPhoto}>
-          <Text style={styles.secondaryButtonText}>{photo ? 'Change photo' : 'Choose photo'}</Text>
-        </TouchableOpacity>
-        {photo ? (
-          <>
-            <Image source={{ uri: photo.uri }} style={styles.receiptPreview} resizeMode="cover" />
-            <TouchableOpacity onPress={() => setPhoto(null)} style={{ marginTop: 8, alignItems: 'center' }}>
-              <Text style={styles.linkText}>Remove photo</Text>
+          <Text style={styles.label}>Due date</Text>
+          <TextInput
+            style={styles.input}
+            value={dueDate}
+            onChangeText={setDueDate}
+            placeholder="YYYY-MM-DD"
+            placeholderTextColor={colors.placeholder}
+            keyboardType="numbers-and-punctuation"
+            maxLength={10}
+          />
+          <Text style={styles.hint}>Example: 2026-12-31</Text>
+
+          <Text style={styles.label}>Receipt photo (optional)</Text>
+          {photo ? (
+            <>
+              <Image source={{ uri: photo.uri }} style={styles.receiptPreview} resizeMode="cover" />
+              <View style={styles.receiptActions}>
+                <TouchableOpacity onPress={pickPhoto}>
+                  <Text style={styles.linkText}>Change photo</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => setPhoto(null)}>
+                  <Text style={styles.removeText}>Remove</Text>
+                </TouchableOpacity>
+              </View>
+            </>
+          ) : (
+            <TouchableOpacity style={styles.receiptBox} onPress={pickPhoto}>
+              <Text style={styles.receiptBoxIcon}>+</Text>
+              <Text style={styles.receiptBoxText}>Add receipt photo</Text>
             </TouchableOpacity>
-          </>
-        ) : null}
+          )}
 
-        {error ? <Text style={styles.error}>{error}</Text> : null}
+          {error ? <Text style={styles.error}>{error}</Text> : null}
 
-        <TouchableOpacity
-          style={[styles.button, saving && styles.buttonDisabled]}
-          onPress={handleSave}
-          disabled={saving}
-        >
-          {saving ? <ActivityIndicator color="#FFFFFF" /> : <Text style={styles.buttonText}>Save entry</Text>}
-        </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.button, saving && styles.buttonDisabled]}
+            onPress={handleSave}
+            disabled={saving}
+          >
+            {saving ? (
+              <ActivityIndicator color={colors.white} />
+            ) : (
+              <Text style={styles.buttonText}>Save entry</Text>
+            )}
+          </TouchableOpacity>
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );

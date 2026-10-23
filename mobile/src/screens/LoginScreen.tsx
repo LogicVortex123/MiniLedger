@@ -3,13 +3,14 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
 import { request } from '../api';
-import { styles } from '../styles';
+import { colors, styles } from '../styles';
 
 type Props = {
   onLogin: (token: string) => void;
@@ -36,6 +37,7 @@ export default function LoginScreen({ onLogin }: Props) {
         method: 'POST',
         body: JSON.stringify({ phone }),
       });
+      setOtp('');
       setStep('otp');
     } catch (e) {
       setError((e as Error).message);
@@ -75,59 +77,88 @@ export default function LoginScreen({ onLogin }: Props) {
       style={styles.screen}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <View style={styles.centered}>
-        <Text style={styles.appTitle}>MiniLedger</Text>
-        <Text style={styles.subtitle}>Keep track of money you lend to friends</Text>
+      <ScrollView contentContainerStyle={styles.loginContent} keyboardShouldPersistTaps="handled">
+        {/* App logo and name */}
+        <View style={styles.logo}>
+          <Text style={styles.logoText}>₹</Text>
+        </View>
+        <Text style={styles.appName}>MiniLedger</Text>
+        <Text style={styles.tagline}>Never forget who owes you money</Text>
 
-        {step === 'phone' ? (
-          <>
-            <Text style={styles.label}>Mobile number</Text>
-            <TextInput
-              style={styles.input}
-              value={phone}
-              onChangeText={setPhone}
-              placeholder="9876543210"
-              keyboardType="number-pad"
-              maxLength={10}
-              autoFocus
-            />
-          </>
-        ) : (
-          <>
-            <Text style={styles.label}>Enter the OTP sent to {phone}</Text>
-            <TextInput
-              style={styles.input}
-              value={otp}
-              onChangeText={setOtp}
-              placeholder="6-digit OTP"
-              keyboardType="number-pad"
-              maxLength={6}
-              autoFocus
-            />
-            <Text style={styles.hint}>Demo: the OTP is printed in the backend terminal.</Text>
-          </>
-        )}
+        <View style={styles.card}>
+          {step === 'phone' ? (
+            <>
+              <Text style={styles.stepText}>STEP 1 OF 2</Text>
+              <Text style={styles.cardTitle}>Log in with your phone</Text>
+              <Text style={styles.cardSubtitle}>We'll send you a one-time password.</Text>
 
-        {error ? <Text style={styles.error}>{error}</Text> : null}
-
-        <TouchableOpacity
-          style={[styles.button, loading && styles.buttonDisabled]}
-          onPress={step === 'phone' ? handleSendOtp : handleVerifyOtp}
-          disabled={loading}
-        >
-          {loading ? (
-            <ActivityIndicator color="#FFFFFF" />
+              <Text style={styles.label}>Mobile number</Text>
+              <View style={styles.inputWithPrefix}>
+                <Text style={styles.inputPrefix}>+91</Text>
+                <TextInput
+                  style={styles.inputInner}
+                  value={phone}
+                  onChangeText={setPhone}
+                  placeholder="98765 43210"
+                  placeholderTextColor={colors.placeholder}
+                  keyboardType="number-pad"
+                  maxLength={10}
+                  autoFocus
+                />
+              </View>
+            </>
           ) : (
-            <Text style={styles.buttonText}>{step === 'phone' ? 'Send OTP' : 'Verify & Log in'}</Text>
-          )}
-        </TouchableOpacity>
+            <>
+              <Text style={styles.stepText}>STEP 2 OF 2</Text>
+              <Text style={styles.cardTitle}>Enter the OTP</Text>
+              <Text style={styles.cardSubtitle}>Sent to +91 {phone}</Text>
 
-        {step === 'otp' ? (
-          <TouchableOpacity onPress={handleChangeNumber} style={{ marginTop: 16, alignItems: 'center' }}>
-            <Text style={styles.linkText}>Change number</Text>
+              <Text style={styles.label}>6-digit code</Text>
+              <TextInput
+                style={[styles.input, styles.otpInput]}
+                value={otp}
+                onChangeText={setOtp}
+                placeholder="••••••"
+                placeholderTextColor={colors.placeholder}
+                keyboardType="number-pad"
+                maxLength={6}
+                autoFocus
+              />
+
+              <View style={styles.infoBox}>
+                <Text style={styles.infoText}>
+                  Demo mode: the OTP is printed in the backend terminal. Use the newest one.
+                </Text>
+              </View>
+            </>
+          )}
+
+          {error ? <Text style={styles.error}>{error}</Text> : null}
+
+          <TouchableOpacity
+            style={[styles.button, loading && styles.buttonDisabled]}
+            onPress={step === 'phone' ? handleSendOtp : handleVerifyOtp}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color={colors.white} />
+            ) : (
+              <Text style={styles.buttonText}>{step === 'phone' ? 'Send OTP' : 'Verify & Log in'}</Text>
+            )}
           </TouchableOpacity>
-        ) : null}
-      </View>
+
+          {step === 'otp' ? (
+            <View style={[styles.row, { justifyContent: 'space-between', marginTop: 18 }]}>
+              <TouchableOpacity onPress={handleChangeNumber}>
+                <Text style={styles.linkText}>Change number</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={handleSendOtp} disabled={loading}>
+                <Text style={styles.linkText}>Resend OTP</Text>
+              </TouchableOpacity>
+            </View>
+          ) : null}
+        </View>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }
