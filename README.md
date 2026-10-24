@@ -14,6 +14,8 @@ log in with your phone, record who borrowed what, and see at a glance what is st
 ![React Native](https://img.shields.io/badge/React_Native-Expo-000020?logo=expo&logoColor=white)
 ![Tests](https://img.shields.io/badge/tests-Jest_%2B_Supertest-C21325?logo=jest&logoColor=white)
 
+**[▶️ Watch the demo video](https://drive.google.com/file/d/1y69rfugBUeEZZcu3YP5XRi0yYWT1Aiwt/view?usp=sharing)**
+
 [Features](#-features) ·
 [Screenshots](#-screenshots) ·
 [Demo](#-demo-video) ·
@@ -41,13 +43,34 @@ log in with your phone, record who borrowed what, and see at a glance what is st
 
 ## 📸 Screenshots
 
-| Login | Home | Add entry |
+Taken from the demo video, running on a real Android phone in Expo Go.
+
+| 1. Login | 2. Enter OTP | 3. Add entry |
 | :-: | :-: | :-: |
-| <img src="docs/login.png" alt="Login screen" width="250"> | <img src="docs/home.png" alt="Home screen" width="250"> | <img src="docs/add.png" alt="Add entry screen" width="250"> |
+| <img src="docs/login.png" alt="Login screen" width="250"> | <img src="docs/otp.png" alt="OTP screen with the demo OTP" width="250"> | <img src="docs/add.png" alt="Add entry screen with a receipt photo" width="250"> |
+| Enter a 10-digit mobile number | The mock OTP is shown in demo mode, tap to fill it | Name, amount, due date and a receipt photo |
+
+| 4. Home | 5. Marked as repaid |
+| :-: | :-: |
+| <img src="docs/home.png" alt="Home screen with a pending entry" width="250"> | <img src="docs/repaid.png" alt="Home screen after marking the entry repaid" width="250"> |
+| Summary card and the new entry, still **PENDING** | The entry turns green and the progress bar reaches 100% |
 
 ## 🎬 Demo video
 
-▶️ **[Watch the 2–3 minute demo](https://link-to-your-video)**
+<div align="center">
+
+[![Watch the demo video](https://img.shields.io/badge/▶_Watch_the_demo-Google_Drive-6D4AFF?style=for-the-badge&logo=googledrive&logoColor=white)](https://drive.google.com/file/d/1y69rfugBUeEZZcu3YP5XRi0yYWT1Aiwt/view?usp=sharing)
+
+</div>
+
+**What the video shows (about 1 min 15 s):**
+
+1. Logging in with a phone number and requesting an OTP
+2. The backend terminal printing the mock OTP (`[MOCK OTP] <phone> -> <code>`), which matches the code on the phone
+3. Verifying the OTP and landing on the home screen
+4. Adding a new entry (Karan Mehta, ₹1,000, due 2026-11-15) with a receipt photo
+5. The entry appearing as **PENDING** with its receipt thumbnail, and the summary updating
+6. Tapping **✓ Repaid**, confirming, and the entry turning green with 100% repaid
 
 ## 🧰 Tech stack
 
@@ -91,6 +114,7 @@ sequenceDiagram
 ```
 MiniLedger/
 ├── start.bat                    starts backend + app together (Windows)
+├── docs/                        screenshots used in this README
 ├── backend/
 │   ├── src/
 │   │   ├── server.ts            starts the server
