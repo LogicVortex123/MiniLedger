@@ -197,6 +197,7 @@ The tests call the API through Supertest and don't need the database:
 | Problem | Fix |
 | --- | --- |
 | App says *"Cannot reach the server"* | Phone and laptop must be on the same Wi-Fi, `API_URL` must match the laptop's current IP, and Windows Firewall must allow Node.js |
+| *"Cannot reach the server"* only when saving with a receipt photo | Keep `mobile/.env` (`EXPO_PUBLIC_USE_RN_FETCH=1`) and restart with `npx expo start --clear`. Expo's newer `fetch` can't upload a `{ uri, name, type }` photo; this setting switches back to React Native's `fetch` |
 | `EADDRINUSE: address already in use :::4000` | Another backend is already running. Close it, or use that one |
 | `Invalid or expired OTP` | Use the **latest** OTP for that number; each OTP works once and expires after 5 minutes |
 | `Route not found` | Check the URL. API routes start with `/api/`, e.g. `/api/loans` |
@@ -270,6 +271,7 @@ erDiagram
 - **Validation on both sides:** the app checks input for instant feedback, and the server checks again with Zod because it can't trust the client.
 - **`app.ts` is separate from `server.ts`**, so tests can call the app with Supertest without opening a port or touching the database.
 - **No navigation library:** with only three screens, a single `screen` state in `App.tsx` is simpler.
+- **React Native's `fetch` for uploads:** `mobile/.env` sets `EXPO_PUBLIC_USE_RN_FETCH=1`, because Expo SDK 58's default `fetch` doesn't accept the `{ uri, name, type }` file object used to upload the receipt. The file has no secrets, so it is committed.
 - **No UI library:** all styling is plain React Native `StyleSheet` in one file (`styles.ts`), with the colours defined in one place.
 
 ## 🔭 What I'd improve

@@ -3,3 +3,5 @@ dist/
 .env
 uploads/
 .expo/
+# mobile/.env has no secrets (only a public Expo setting), so it is committed
+!mobile/.env
